@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Origin Day — Email Flow Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800;900&family=Barlow:wght@300;400;500&family=EB+Garamond:ital,wght@0,400;1,400&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #e8e5df;
+    font-family: 'Barlow', sans-serif;
+    padding: 40px 20px;
+  }
+
+  /* ── Nav tabs ── */
+  .tab-nav {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  .tab-btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #7a6b4e;
+    background: transparent;
+    border: 1px solid rgba(201,168,76,0.35);
+    padding: 8px 18px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab-btn:hover { color: #c9a84c; border-color: rgba(201,168,76,0.7); }
+  .tab-btn.active {
+    color: #f6f4f0;
+    background: #1a1a1a;
+    border-color: #1a1a1a;
+  }
+
+  /* ── Email wrapper ── */
+  .email-wrap { display: none; }
+  .email-wrap.active { display: block; }
+
+  /* ── Email shell ── */
+  .email {
+    max-width: 620px;
+    margin: 0 auto;
+    background: #f6f4f0;
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  /* ── Header ── */
+  .email-header {
+    background: #111;
+    padding: 36px 48px 32px;
+    text-align: center;
+    position: relative;
+  }
+  .email-header img.seed-hand {
+    width: 56px;
+    height: auto;
+    margin-bottom: 16px;
+    filter: brightness(1.15);
+  }
+  .email-eyebrow {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.72rem;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    color: rgba(201,168,76,0.75);
+    margin-bottom: 14px;
+  }
+  .email-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: clamp(38px, 8vw, 68px);
+    line-height: 0.92;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: linear-gradient(
+      90deg,
+      #f6f4f0 0%,
+      #f6f4f0 15%,
+      #c9a84c 30%,
+      #f0c84a 50%,
+      #c9a84c 70%,
+      #f6f4f0 85%,
+      #f6f4f0 100%
+    );
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 5s ease-in-out infinite;
+    margin-bottom: 18px;
+  }
+  @keyframes shimmer {
+    0%   { background-position: 110% 50%; }
+    50%  { background-position: -10% 50%; }
+    100% { background-position: 110% 50%; }
+  }
+  .email-date-badge {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 1rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #c9a84c;
+    border: 1px solid rgba(201,168,76,0.35);
+    padding: 6px 18px;
+    border-radius: 2px;
+    display: inline-block;
+    margin-bottom: 0;
+  }
+
+  /* ── Gold rule ── */
+  .gold-rule {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #c9a84c 30%, #f0c84a 50%, #c9a84c 70%, transparent);
+  }
+
+  /* ── Sub-header bar ── */
+  .email-subheader {
+    background: #1a1a1a;
+    padding: 16px 48px;
+    text-align: center;
+  }
+  .email-subheader p {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 0.88rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(246,244,240,0.7);
+  }
+
+  /* ── Body ── */
+  .email-body {
+    padding: 44px 48px;
+  }
+
+  /* ── Greeting ── */
+  .greeting {
+    font-family: 'EB Garamond', serif;
+    font-size: 1.35rem;
+    font-style: italic;
+    color: #c9a84c;
+    margin-bottom: 20px;
+  }
+
+  /* ── Body text ── */
+  .email-body p {
+    font-family: 'Barlow', sans-serif;
+    font-weight: 300;
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: #2a2a2a;
+    margin-bottom: 20px;
+  }
+  .email-body p strong {
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+
+  /* ── Section heading ── */
+  .section-heading {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(201,168,76,0.8);
+    margin: 32px 0 14px;
+  }
+
+  /* ── Steps ── */
+  .step-list {
+    list-style: none;
+    margin-bottom: 28px;
+  }
+  .step-list li {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 14px;
+  }
+  .step-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    color: #c9a84c;
+    background: rgba(201,168,76,0.08);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 2px;
+    min-width: 36px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+  }
+  .step-text {
+    font-family: 'Barlow', sans-serif;
+    font-weight: 300;
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: #2a2a2a;
+  }
+  .step-text strong { font-weight: 600; color: #1a1a1a; }
+
+  /* ── Tip box ── */
+  .tip-box {
+    border-left: 2px solid #c9a84c;
+    padding: 16px 20px;
+    background: rgba(201,168,76,0.05);
+    margin: 24px 0;
+    border-radius: 0 2px 2px 0;
+  }
+  .tip-box p {
+    margin: 0;
+    font-size: 0.88rem;
+    color: #3a3225;
+  }
+
+  /* ── Synchronized moment table ── */
+  .sync-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0 28px;
+  }
+  .sync-table td {
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+    font-family: 'Barlow Condensed', sans-serif;
+  }
+  .sync-table td:first-child {
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+    color: #1a1a1a;
+  }
+  .sync-table td:last-child {
+    text-align: right;
+    font-weight: 900;
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+    color: #c9a84c;
+  }
+  .sync-table .tz-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: #7a6b4e;
+    font-weight: 400;
+  }
+
+  /* ── CTA button ── */
+  .cta-wrap { text-align: center; margin: 36px 0 8px; }
+  .cta-btn {
+    display: inline-block;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 0.85rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: #f6f4f0;
+    background: #1a1a1a;
+    border: 1px solid rgba(201,168,76,0.4);
+    padding: 14px 36px;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+  .cta-btn:hover {
+    background: #c9a84c;
+    color: #1a1a1a;
+    border-color: #c9a84c;
+  }
+  .cta-secondary {
+    display: inline-block;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: #c9a84c;
+    border: 1px solid rgba(201,168,76,0.35);
+    padding: 10px 24px;
+    border-radius: 2px;
+    margin-left: 12px;
+  }
+
+  /* ── Divider ── */
+  .body-rule {
+    width: 40px;
+    height: 1px;
+    background: linear-gradient(90deg, #c9a84c, #f0c84a);
+    margin: 32px 0;
+  }
+
+  /* ── Checklist ── */
+  .checklist {
+    list-style: none;
+    margin-bottom: 24px;
+  }
+  .checklist li {
+    font-family: 'Barlow', sans-serif;
+    font-weight: 300;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #2a2a2a;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(201,168,76,0.12);
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .checklist li::before {
+    content: '—';
+    color: #c9a84c;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .checklist li strong { font-weight: 600; color: #1a1a1a; }
+
+  /* ── Quote / pull ── */
+  .pull-quote {
+    text-align: center;
+    padding: 28px 32px;
+    background: #111;
+    margin: 32px 0;
+    border-radius: 2px;
+  }
+  .pull-quote p {
+    font-family: 'EB Garamond', serif;
+    font-size: 1.2rem;
+    font-style: italic;
+    line-height: 1.55;
+    color: rgba(246,244,240,0.88);
+    margin-bottom: 12px;
+  }
+  .pull-quote cite {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(201,168,76,0.8);
+  }
+
+  /* ── Toolkit pills ── */
+  .pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 16px 0 28px;
+  }
+  .pill {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #c9a84c;
+    border: 1px solid rgba(201,168,76,0.35);
+    padding: 6px 14px;
+    border-radius: 2px;
+    background: rgba(201,168,76,0.04);
+  }
+
+  /* ── Footer ── */
+  .email-footer {
+    background: #1a1a1a;
+    padding: 28px 48px;
+    text-align: center;
+  }
+  .footer-tagline {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(201,168,76,0.7);
+    margin-bottom: 12px;
+  }
+  .footer-links {
+    font-family: 'Barlow', sans-serif;
+    font-size: 0.75rem;
+    color: rgba(246,244,240,0.35);
+    margin-top: 16px;
+  }
+  .footer-links a { color: rgba(246,244,240,0.45); text-decoration: none; margin: 0 6px; }
+
+  @media (max-width: 640px) {
+    .email-body { padding: 32px 24px; }
+    .email-header { padding: 28px 24px 24px; }
+    .email-subheader { padding: 14px 24px; }
+    .email-footer { padding: 24px; }
+    .cta-secondary { display: block; margin: 12px auto 0; width: fit-content; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .email-title { animation: none; background-position: 50% 50%; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="showEmail(0)">01 — Welcome</button>
+  <button class="tab-btn" onclick="showEmail(1)">02 — Prepare</button>
+  <button class="tab-btn" onclick="showEmail(2)">03 — Amplify</button>
+  <button class="tab-btn" onclick="showEmail(3)">04 — Countdown</button>
+</nav>
+
+<!-- ════════════════════════════════════════════════
+     EMAIL 01 — WELCOME & CONFIRMATION
+════════════════════════════════════════════════ -->
+<div class="email-wrap active" id="email-0">
+<div class="email">
+  <div class="email-header">
+    <img class="seed-hand" src="https://ourorigin.earth/wp-content/uploads/2026/04/cropped-seed.png" alt="Origin seed hand"/>
+    <p class="email-eyebrow">Your event has been received</p>
+    <h1 class="email-title">You're Part<br>of Origin</h1>
+    <span class="email-date-badge">October 17 · 2026</span>
+  </div>
+  <div class="gold-rule"></div>
+  <div class="email-subheader">
+    <p>One Humanity &nbsp;·&nbsp; One Planet &nbsp;·&nbsp; One Moment</p>
+  </div>
+
+  <div class="email-body">
+    <p class="greeting">Welcome to the movement.</p>
+
+    <p>Your regional Origin event has been registered and will appear on the global map within 24–48 hours. What you have just done matters more than you may realise — every gathering that joins this network makes the whole stronger.</p>
+
+    <p>On <strong>October 17, 2026</strong>, communities across every continent will gather simultaneously to celebrate our shared humanity, honour the Earth, and take collective regenerative action. Your event is now part of that living global network.</p>
+
+    <p class="section-heading">What happens next</p>
+    <ul class="step-list">
+      <li><span class="step-num">01</span><span class="step-text"><strong>Map listing:</strong> Your event page, ticketing link, and social channels will go live on the Origin global map within 48 hours.</span></li>
+      <li><span class="step-num">02</span><span class="step-text"><strong>Brand kit incoming:</strong> Watch for our next email — it includes your promotional toolkit, logo files, hashtags, and brand guidelines.</span></li>
+      <li><span class="step-num">03</span><span class="step-text"><strong>Broadcast opportunity:</strong> If you'd like your event to stream into the global broadcast, our production team will be in touch to schedule a test.</span></li>
+    </ul>
+
+    <div class="tip-box">
+      <p>The global synchronized moment is <strong>12:00 PM Pacific Time</strong>. We encourage you to build this into your event programme — it's the heartbeat that connects all 
+gatherings across the world in a single shared breath.</p>
+    </div>
+
+    <div class="pull-quote">
+      <p>"Origin marks a pivotal moment for humanity — a celebration of our return to our role as a keystone species."</p>
+      <cite>Dr Zach Bush</cite>
+    </div>
+
+    <div class="cta-wrap">
+      <a class="cta-btn" href="https://ourorigin.earth">View Your Event on the Map →</a>
+    </div>
+  </div>
+
+  <div class="gold-rule"></div>
+  <div class="email-footer">
+    <p class="footer-tagline">Locally Created &nbsp;·&nbsp; Globally Connected</p>
+    <p class="footer-links">
+      <a href="https://ourorigin.earth">ourorigin.earth</a> &nbsp;·&nbsp;
+      <a href="#">Unsubscribe</a> &nbsp;·&nbsp;
+      <a href="#">Privacy Policy</a>
+    </p>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     EMAIL 02 — PREPARE YOUR EVENT
+════════════════════════════════════════════════ -->
+<div class="email-wrap" id="email-1">
+<div class="email">
+  <div class="email-header">
+    <img class="seed-hand" src="https://ourorigin.earth/wp-content/uploads/2026/04/cropped-seed.png" alt="Origin seed hand"/>
+    <p class="email-eyebrow">Shaping your gathering</p>
+    <h1 class="email-title">Prepare<br>Your Event</h1>
+    <span class="email-date-badge">October 17 · 2026</span>
+  </div>
+  <div class="gold-rule"></div>
+  <div class="email-subheader">
+    <p>Ancestral Wisdom &nbsp;·&nbsp; Regenerative Action &nbsp;·&nbsp; Your Community</p>
+  </div>
+
+  <div class="email-body">
+    <p class="greeting">Your event. Your community. Your culture.</p>
+
+    <p>Origin regional events are locally created — which means there is no single template to follow. A ceremony on a beach, a concert in a park, a school activation, a meditation circle, a large festival stage — all of it belongs. What matters is that your gathering carries intention, welcomes all, and honours the Earth we share.</p>
+
+    <p class="section-heading">Shaping your programme</p>
+    <ul class="checklist">
+      <li><strong>Choose a meaningful venue</strong> — a park, beach, concert hall, community centre, sacred site, or open land.</li>
+      <li><strong>Weave in local cultural traditions</strong> — music, storytelling, ceremony, dance, prayer, or art native to your place.</li>
+      <li><strong>Include a regenerative action</strong> — seed planting, tree planting, community clean-up, food garden project, or any hands-in-earth moment.</li>
+      <li><strong>If including Indigenous ceremony</strong>, ensure proper permissions, acknowledgement, respect, and fair compensation are in place before the event.</li>
+      <li><strong>Make it accessible</strong> — free entry options where possible, wheelchair access, child-friendly elements.</li>
+    </ul>
+
+    <p class="section-heading">Zero-waste planning</p>
+    <p>Origin events are asked to aim for zero single-use plastics and leave-no-trace practices. This is not a rule — it is an invitation to model the regenerative future we are gathering to celebrate.</p>
+
+    <div class="tip-box">
+      <p>If your event generates profit, you are asked to donate to a local nonprofit — ideally one aligned with regeneration, Indigenous wisdom, ecology, youth, or ecological restoration. After the event, you'll be invited to share which organisation you supported and the donation amount.</p>
+    </div>
+
+    <p class="section-heading">The synchronized moment</p>
+    <p>At the times below, all Origin events around the world will tune into the global broadcast, join the Universal Prayer, and sing the Anthem for Unity together. If this window aligns with your programme, please build it in.</p>
+
+    <table class="sync-table">
+      <tr><td>San Francisco <span class="tz-label">PDT</span></td><td>12:00 pm</td></tr>
+      <tr><td>New York <span class="tz-label">EDT</span></td><td>3:00 pm</td></tr>
+      <tr><td>London <span class="tz-label">BST</span></td><td>8:00 pm</td></tr>
+      <tr><td>Johannesburg <span class="tz-label">SAST</span></td><td>9:00 pm</td></tr>
+      <tr><td>New Delhi <span class="tz-label">IST</span></td><td>12:30 am ☽</td></tr>
+      <tr><td>Sydney <span class="tz-label">AEDT</span></td><td>6:00 am ☽</td></tr>
+    </table>
+    <p style="font-size:0.78rem; color:#7a6b4e; margin-top:-16px; margin-bottom: 24px;">☽ Sunday, October 18 &nbsp;·&nbsp; Australasian events may also be held on October 18.</p>
+
+    <div class="cta-wrap">
+      <a class="cta-btn" href="https://ourorigin.earth">Event Planning Guide →</a>
+    </div>
+  </div>
+
+  <div class="gold-rule"></div>
+  <div class="email-footer">
+    <p class="footer-tagline">Locally Created &nbsp;·&nbsp; Globally Connected</p>
+    <p class="footer-links">
+      <a href="https://ourorigin.earth">ourorigin.earth</a> &nbsp;·&nbsp;
+      <a href="#">Unsubscribe</a> &nbsp;·&nbsp;
+      <a href="#">Privacy Policy</a>
+    </p>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     EMAIL 03 — AMPLIFY & CONNECT
+════════════════════════════════════════════════ -->
+<div class="email-wrap" id="email-2">
+<div class="email">
+  <div class="email-header">
+    <img class="seed-hand" src="https://ourorigin.earth/wp-content/uploads/2026/04/cropped-seed.png" alt="Origin seed hand"/>
+    <p class="email-eyebrow">Your promotional toolkit is ready</p>
+    <h1 class="email-title">Amplify<br>&amp; Connect</h1>
+    <span class="email-date-badge">October 17 · 2026</span>
+  </div>
+  <div class="gold-rule"></div>
+  <div class="email-subheader">
+    <p>Your Event &nbsp;·&nbsp; The Global Network &nbsp;·&nbsp; One Signal</p>
+  </div>
+
+  <div class="email-body">
+    <p class="greeting">Now — let the world know you're gathering.</p>
+
+    <p>The Origin global team is ready to amplify your event across our international network. But the most powerful signal begins locally — with your own community, your own voice, and your own story of why this moment matters.</p>
+
+    <p class="section-heading">Your brand toolkit</p>
+    <p>The following are available to download from your organiser portal. All brand assets are approved for use on posters, flyers, social media, event signage, and websites.</p>
+
+    <div class="pill-row">
+      <span class="pill">Origin Logo Files</span>
+      <span class="pill">Brand Guidelines</span>
+      <span class="pill">Social Copy Pack</span>
+      <span class="pill">Approved Descriptions</span>
+      <span class="pill">Hashtag Guide</span>
+      <span class="pill">Poster Templates</span>
+    </div>
+
+    <div class="tip-box">
+      <p>Create a local name for your event — <em>Origin Toronto, Origin Cape Town, Origin Bangalore</em> — to build a sense of place within the global movement. Use the hashtags <strong>#OriginDay</strong> and <strong>#October17</strong> across all posts.</p>
+    </div>
+
+    <p class="section-heading">Be part of the live global broadcast</p>
+    <ul class="step-list">
+      <li><span class="step-num">01</span><span class="step-text"><strong>Express your interest</strong> by replying to this email or completing the broadcast form in your organiser portal.</span></li>
+      <li><span class="step-num">02</span><span class="step-text"><strong>Requirements:</strong> Reliable internet connection, a tech contact on the day, a suitable camera and audio setup, and a pre-event test with our broadcast team.</span></li>
+      <li><span class="step-num">03</span><span class="step-text"><strong>We provide a streaming kit</strong> that allows your event to feed directly into the main broadcast studios and reach audiences worldwide.</span></li>
+    </ul>
+
+    <p class="section-heading">How Origin amplifies you</p>
+    <ul class="checklist">
+      <li>Your event listed on the Regional Events page with links to ticketing and social channels.</li>
+      <li>Amplification across the Origin international social and email network.</li>
+      <li>Inclusion in Origin press releases and media outreach where relevant.</li>
+      <li>Story features from outstanding regional events in the global post-event report.</li>
+    </ul>
+
+    <div class="cta-wrap">
+      <a class="cta-btn" href="https://ourorigin.earth">Download Your Toolkit →</a>
+      <a class="cta-secondary" href="https://ourorigin.earth">Apply for Broadcast</a>
+    </div>
+  </div>
+
+  <div class="gold-rule"></div>
+  <div class="email-footer">
+    <p class="footer-tagline">Locally Created &nbsp;·&nbsp; Globally Connected</p>
+    <p class="footer-links">
+      <a href="https://ourorigin.earth">ourorigin.earth</a> &nbsp;·&nbsp;
+      <a href="#">Unsubscribe</a> &nbsp;·&nbsp;
+      <a href="#">Privacy Policy</a>
+    </p>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     EMAIL 04 — THE COUNTDOWN
+════════════════════════════════════════════════ -->
+<div class="email-wrap" id="email-3">
+<div class="email">
+  <div class="email-header">
+    <img class="seed-hand" src="https://ourorigin.earth/wp-content/uploads/2026/04/cropped-seed.png" alt="Origin seed hand"/>
+    <p class="email-eyebrow">Seven days to go</p>
+    <h1 class="email-title">The<br>Moment<br>Approaches</h1>
+    <span class="email-date-badge">October 17 · 2026</span>
+  </div>
+  <div class="gold-rule"></div>
+  <div class="email-subheader">
+    <p>Every Continent &nbsp;·&nbsp; One Synchronized Moment &nbsp;·&nbsp; One Future</p>
+  </div>
+
+  <div class="email-body">
+    <p class="greeting">Seven days. Then we gather.</p>
+
+    <p>In one week, communities in every timezone — from Johannesburg to San Francisco, from New Delhi to Sydney — will pause together. They will plant, pray, sing, and celebrate. Your event will be part of that single, living moment.</p>
+
+    <p>Here is your final week checklist to make sure everything is in place.</p>
+
+    <p class="section-heading">Final week checklist</p>
+    <ul class="checklist">
+      <li><strong>Venue confirmed:</strong> Permits, insurance, and site access locked in.</li>
+      <li><strong>Safety plan finalised:</strong> First aid, security, and emergency contacts in place.</li>
+      <li><strong>Artists and speakers confirmed:</strong> Agreements signed, schedules shared.</li>
+      <li><strong>Synchronized moment queued:</strong> Global broadcast link ready for the exact moment in your timezone (see table below).</li>
+      <li><strong>Zero-waste plan active:</strong> No single-use plastics, leave-no-trace station set up.</li>
+      <li><strong>Volunteers briefed:</strong> Roles, timings, and contact points confirmed.</li>
+      <li><strong>Documentation team ready:</strong> Photographer or videographer briefed to capture the day.</li>
+      <li><strong>Local nonprofit confirmed:</strong> Know where any surplus is going before the event opens.</li>
+    </ul>
+
+    <p class="section-heading">Your synchronized moment</p>
+
+    <table class="sync-table">
+      <tr><td>San Francisco <span class="tz-label">PDT</span></td><td>12:00 pm</td></tr>
+      <tr><td>New York <span class="tz-label">EDT</span></td><td>3:00 pm</td></tr>
+      <tr><td>London <span class="tz-label">BST</span></td><td>8:00 pm</td></tr>
+      <tr><td>Johannesburg <span class="tz-label">SAST</span></td><td>9:00 pm</td></tr>
+      <tr><td>New Delhi <span class="tz-label">IST</span></td><td>12:30 am ☽</td></tr>
+      <tr><td>Sydney <span class="tz-label">AEDT</span></td><td>6:00 am ☽</td></tr>
+    </table>
+
+    <div class="body-rule"></div>
+
+    <p class="section-heading">After your event</p>
+    <p>Once the gathering is complete, you'll be invited to share your story with the world. Origin's global storytelling team will reach out within 48 hours of October 17 to collect:</p>
+    <ul class="checklist">
+      <li>Attendance numbers and photos or video highlights</li>
+      <li>Details of your regenerative action and its impact</li>
+      <li>The name and donation amount of your supported nonprofit</li>
+      <li>A short quote or testimonial from your community</li>
+    </ul>
+
+    <div class="pull-quote">
+      <p>"With the convergence of modern science, technology, and ancestral wisdom, we can now realign human activity with natural systems — restoring health, vitality, and harmony with Earth's rebirth."</p>
+      <cite>Dr Zach Bush</cite>
+    </div>
+
+    <p>Thank you for taking this on. What you have organised — the hours spent, the community gathered, the intention held — is the movement made real.</p>
+
+    <p>We will see you on October 17.</p>
+
+    <div class="cta-wrap">
+      <a class="cta-btn" href="https://ourorigin.earth">Access the Global Broadcast →</a>
+    </div>
+  </div>
+
+  <div class="gold-rule"></div>
+  <div class="email-footer">
+    <p class="footer-tagline">One Humanity &nbsp;·&nbsp; One Planet &nbsp;·&nbsp; One Future</p>
+    <p class="footer-links">
+      <a href="https://ourorigin.earth">ourorigin.earth</a> &nbsp;·&nbsp;
+      <a href="#">Unsubscribe</a> &nbsp;·&nbsp;
+      <a href="#">Privacy Policy</a>
+    </p>
+  </div>
+</div>
+</div>
+
+<script>
+  function showEmail(idx) {
+    document.querySelectorAll('.email-wrap').forEach((el, i) => {
+      el.classList.toggle('active', i === idx);
+    });
+    document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+      btn.classList.toggle('active', i === idx);
+    });
+  }
+</script>
+</body>
+</html>
